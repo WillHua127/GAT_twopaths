@@ -35,11 +35,10 @@ class GraphAttentionLayer(nn.Module):
         h_high = F.relu6(h_high)
         h_low = F.relu6(h_low)
         
-        N_high = h_high.size()[0]
-        N_low = h_low.size()[0]
+        N = input.shape[0]
        
-        a_input_high = torch.cat([h_high.repeat(1, N_high).view(N_high * N_high, -1), h_high.repeat(N_high, 1)], dim=1).view(N_high, -1, 2 * self.out_features)
-        a_input_low = torch.cat([h_high.repeat(1, N_low).view(N_low * N_low, -1), h_high.repeat(N_low, 1)], dim=1).view(N_low, -1, 2 * self.out_features)
+        a_input_high = torch.cat([h_high.repeat(1, N).view(N * N, -1), h_high.repeat(N, 1)], dim=1).view(N, -1, 2 * self.out_features)
+        a_input_low = torch.cat([h_high.repeat(1, N).view(N * N, -1), h_high.repeat(N, 1)], dim=1).view(N, -1, 2 * self.out_features)
         
         e_high = self.leakyrelu(torch.matmul(a_input_high, self.a_high).squeeze(2))
         e_low = self.leakyrelu(torch.matmul(a_input_low, self.a_low).squeeze(2))
@@ -61,10 +60,10 @@ class GraphAttentionLayer(nn.Module):
         attention_high = F.dropout(attention_high, self.dropout, training=self.training)
         attention_low = F.dropout(attention_low, self.dropout, training=self.training)
         
-        h_high = torch.add(h_high.repeat(1, N_high).view(N_high * N_high, -1), h_high.repeat(N_high, 1)).view(N_high, -1, self.out_features)
-        h_high = torch.sum(h_high, dim=1)
-        h_low = torch.sub(h_low.repeat(1, N_low).view(N_low * N_low, -1), h_low.repeat(N_low, 1)).view(N_low, -1, self.out_features) 
-        h_low = torch.sum(h_low, dim=1)
+        h_high = torch.add(h_high.repeat(1, N).view(N * N, -1), h_high.repeat(N, 1)).view(N, -1, self.out_features)
+        h_high = torch.sum(h_high, 0)
+        h_low = torch.sub(h_low.repeat(1, N).view(N * N, -1), h_low.repeat(N, 1)).view(N, -1, self.out_features) 
+        h_low = torch.sum(h_low, 0)
         
         h_high = torch.matmul(attention_high, h_high)
         h_low = torch.matmul(attention_low, h_low)
