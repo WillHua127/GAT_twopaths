@@ -91,7 +91,6 @@ def train(epoch, model, features, labels, adj, idx_train, idx_val, optimizer):
           'loss_val: {:.4f}'.format(loss_val.data.item()),
           'acc_val: {:.4f}'.format(acc_val),
           'time: {:.4f}s'.format(time.time() - t))
-
     return loss_val.data.item()
 
 
@@ -103,7 +102,7 @@ def compute_test(model, features, labels, adj, idx_test):
     print("Test set results:",
           "loss= {:.4f}".format(loss_test.data.item()),
           "accuracy= {:.4f}".format(acc_test))
-    return loss_test.data.item()
+    return acc_test
 
 def accuracy(output, labels):
     preds = output.max(1)[1].type_as(labels)
@@ -114,18 +113,18 @@ def accuracy(output, labels):
 # Train model
 t_total = time.time()
 test_acc = []
-test_loss = []
+val_loss = []
 bad_counter = 0
+best_test = 0
 best = args.epochs + 1
 best_epoch = 0
 for epoch in range(args.epochs):
-    train(epoch, model, features, labels, adj, idx_train, idx_val, optimizer)
-    loss, acc = compute_test(model, features, labels, adj, idx_test)
-    test_loss.append(loss)
-    test_acc.append(acc)
+    val_loss.append(train(epoch, model, features, labels, adj, idx_train, idx_val, optimizer))
+    test_acc.append(compute_test(model, features, labels, adj, idx_test))
 
-    if test_loss[-1] < best:
-        best = test_loss[-1]
+    if val_loss[-1] < best:
+        best = val_loss[-1]
+        best_test = test_acc[-1]
         best_epoch = epoch
         bad_counter = 0
     else:
@@ -138,4 +137,4 @@ print("Optimization Finished!")
 print("Total time elapsed: {:.4f}s".format(time.time() - t_total))
 
 # Restore best model
-print("The best test accuracy : ", max(test_acc))
+print("The best test accuracy : ",best_test)
