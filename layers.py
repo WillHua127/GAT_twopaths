@@ -36,22 +36,14 @@ class GraphAttentionLayer(nn.Module):
         
         N_high = h_high.size()[0]
         N_low = h_low.size()[0]
-        #addition
-        #input1 = torch.add(h.repeat(1, N).view(N * N, -1), h.repeat(N, 1))
-        #subtraction
-        #input2 = torch.sub(h.repeat(1, N).view(N * N, -1), h.repeat(N, 1))
-        #old
+       
         a_input_high = torch.cat([h_high.repeat(1, N_high).view(N_high * N_high, -1), h_high.repeat(N_high, 1)], dim=1).view(N_high, -1, 2 * self.out_features)
         a_input_low = torch.cat([h_high.repeat(1, N_low).view(N_low * N_low, -1), h_high.repeat(N_low, 1)], dim=1).view(N_low, -1, 2 * self.out_features)
-        #concat
-        #a_input = torch.cat([h.repeat(1, N).view(N * N, -1), input1, input2], dim=1).view(N, -1, 3 * self.out_features)
+        
         e_high = self.leakyrelu(torch.matmul(a_input_high, self.a_high).squeeze(2))
         e_low = self.leakyrelu(torch.matmul(a_input_low, self.a_low).squeeze(2))
 
-        #zero_vec_high = -9e15*torch.ones_like(e_high)
-        #zero_vec_low = -9e15*torch.ones_like(e_low)
-        #attention_high = torch.where(adj > 0, e_high, zero_vec_high)
-        #attention_low = torch.where(adj > 0, e_low, zero_vec_low)
+        
         adj_unnormalized = torch.zeros_like(adj)
         one = torch.ones((1,1))
         adj_unnormalized = torch.where(adj > 0, one, adj_unnormalized)
