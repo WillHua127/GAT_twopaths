@@ -9,13 +9,14 @@ class GraphAttentionLayer(nn.Module):
     Simple GAT layer, similar to https://arxiv.org/abs/1710.10903
     """
 
-    def __init__(self, in_features, out_features, dropout, alpha, concat=True):
+    def __init__(self, in_features, out_features, dropout, alpha, concat=True, no_cuda=False):
         super(GraphAttentionLayer, self).__init__()
         self.dropout = dropout
         self.in_features = in_features
         self.out_features = out_features
         self.alpha = alpha
         self.concat = concat
+        self.no_cuda = no_cuda
 
         self.W_high = nn.Parameter(torch.zeros(size=(in_features, out_features)))
         nn.init.xavier_uniform_(self.W_high.data, gain=1.414)
@@ -46,6 +47,9 @@ class GraphAttentionLayer(nn.Module):
         
         adj_unnormalized = torch.zeros_like(adj)
         one = torch.ones((1,1))
+        if self.no_cuda:
+            adj_unnormalized = adj_unnormalized.cuda()
+            one = one.cuda()
         adj_unnormalized = torch.where(adj > 0, one, adj_unnormalized)
         attention_high = torch.matmul(e_high, adj_unnormalized)
         attention_low = torch.matmul(e_low, adj_unnormalized)
