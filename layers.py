@@ -16,7 +16,7 @@ class GraphAttentionLayer(nn.Module):
         self.out_features = out_features
         self.alpha = alpha
         self.concat = concat
-        self.no_cuda = no_cuda
+        self.cuda = not no_cuda and torch.cuda.is_available()
 
         self.W_high = nn.Parameter(torch.zeros(size=(in_features, out_features)))
         nn.init.xavier_uniform_(self.W_high.data, gain=1.414)
@@ -47,7 +47,7 @@ class GraphAttentionLayer(nn.Module):
         
         adj_unnormalized = torch.zeros_like(adj)
         one = torch.ones((1,1))
-        if self.no_cuda:
+        if self.cuda:
             adj_unnormalized = adj_unnormalized.cuda()
             one = one.cuda()
         adj_unnormalized = torch.where(adj > 0, one, adj_unnormalized)
