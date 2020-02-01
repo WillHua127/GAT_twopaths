@@ -124,18 +124,19 @@ def accuracy(output, labels):
 
 # Train model
 t_total = time.time()
-loss_values = []
+test_acc = []
 test_loss = []
 bad_counter = 0
 best = args.epochs + 1
 best_epoch = 0
 for epoch in range(args.epochs):
-    loss_values.append(train(epoch, model, features, labels, adj, idx_train, idx_val, optimizer))
-    test_loss.append(compute_test(model, features, labels, adj, idx_test))
+    train(epoch, model, features, labels, adj, idx_train, idx_val, optimizer)
+    loss, acc = compute_test(model, features, labels, adj, idx_test)
+    test_loss.append(loss)
+    test_acc.append(acc)
 
-    torch.save(model.state_dict(), '{}.pkl'.format(epoch))
     if test_loss[-1] < best:
-        best = loss_values[-1]
+        best = test_loss[-1]
         best_epoch = epoch
         bad_counter = 0
     else:
@@ -143,25 +144,9 @@ for epoch in range(args.epochs):
 
     if bad_counter == args.patience:
         break
-
-    files = glob.glob('*.pkl')
-    for file in files:
-        epoch_nb = int(file.split('.')[0])
-        if epoch_nb < best_epoch:
-            os.remove(file)
-
-files = glob.glob('*.pkl')
-for file in files:
-    epoch_nb = int(file.split('.')[0])
-    if epoch_nb > best_epoch:
-        os.remove(file)
-
+        
 print("Optimization Finished!")
 print("Total time elapsed: {:.4f}s".format(time.time() - t_total))
 
 # Restore best model
-print('Loading {}th epoch'.format(best_epoch))
-model.load_state_dict(torch.load('{}.pkl'.format(best_epoch)))
-
-# Testing
-compute_test(model, features, labels, adj, idx_test)
+print("The best test accuracy : ", max(test_acc))
