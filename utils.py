@@ -17,18 +17,15 @@ def parse_index_file(filename):
     return index
 
 def load_dataset(dataset, dense=True):
-    if dataset == 'cora':
-        idx_train, idx_val, idx_test = range(140), range(140, 640), range(1708, 2708)
-    elif dataset == 'citeseer':
-        idx_train, idx_val, idx_test = range(120), range(120, 620), range(2312, 3312)
-    elif dataset == 'pubmed':
-        idx_train, idx_val, idx_test = range(60), range(60, 560), range(18717, 19717)
-
+    dense_adj, features, labels = torch.load("%s_dense_adj.pt" % dataset), torch.load("%s_features.pt" % dataset), torch.load("%s_labels.pt" % dataset)
+    
+    s_val = labels[np.random.choice(labels.shape[0], 500, replace=False)]
+    idx_train = range(len(y))
+    idx_val = range(len(y), len(s_val) + 500)
+    idx_test = range(len(s_val) + 500, len(s_val) + 1500)
     idx_train = torch.LongTensor(idx_train)
     idx_val = torch.LongTensor(idx_val)
     idx_test = torch.LongTensor(idx_test)
-
-    dense_adj, features, labels = torch.load("%s_dense_adj.pt" % dataset), torch.load("%s_features.pt" % dataset), torch.load("%s_labels.pt" % dataset)
     if dense:
         return dense_adj, features, labels, idx_train, idx_val, idx_test
     else:
