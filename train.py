@@ -13,7 +13,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 
-from utils import load_data
+from utils import load_dataset
 from models import GAT
 
 # Training settings
@@ -41,7 +41,7 @@ if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
 # Load data
-adj, features, labels, idx_train, idx_val, idx_test = load_data(args.train_prefix)
+adj, features, labels, idx_train, idx_val, idx_test = load_dataset(args.train_prefix)
 
 # Model and optimizer
 model = GAT(nfeat=features.shape[1], 
@@ -85,24 +85,20 @@ def train(epoch, model, features, labels, adj, idx_train, idx_val, optimizer):
 
     loss_val = F.nll_loss(output[idx_val], labels[idx_val])
     acc_val = accuracy(output[idx_val], labels[idx_val])
+    
+    loss_test = F.nll_loss(output[idx_test], labels[idx_test])
+    acc_test = accuracy(output[idx_test], labels[idx_test])
+    
     print('Epoch: {:04d}'.format(epoch+1),
           'loss_train: {:.4f}'.format(loss_train.data.item()),
           'acc_train: {:.4f}'.format(acc_train),
           'loss_val: {:.4f}'.format(loss_val.data.item()),
           'acc_val: {:.4f}'.format(acc_val),
+          'loss_test: {:.4f}'.format(loss_test.data.item()),
+          'acc_test: {:.4f}'.format(acc_test),
           'time: {:.4f}s'.format(time.time() - t))
-    return loss_val.data.item()
+    return loss_val.data.item(), acc_test
 
-
-def compute_test(model, features, labels, adj, idx_test):
-    model.eval()
-    output = model(features, adj)
-    loss_test = F.nll_loss(output[idx_test], labels[idx_test])
-    acc_test = accuracy(output[idx_test], labels[idx_test])
-    print("Test set results:",
-          "loss= {:.4f}".format(loss_test.data.item()),
-          "accuracy= {:.4f}".format(acc_test))
-    return acc_test
 
 def accuracy(output, labels):
     preds = output.max(1)[1].type_as(labels)
@@ -119,8 +115,9 @@ best_test = 0
 best = args.epochs + 1
 best_epoch = 0
 for epoch in range(args.epochs):
-    val_loss.append(train(epoch, model, features, labels, adj, idx_train, idx_val, optimizer))
-    test_acc.append(compute_test(model, features, labels, adj, idx_test))
+    loss, acc = train(epoch, model, features, labels, adj, idx_train, idx_val, optimizer)
+    val_loss.append(loss)
+    test_acc.append(acc)
 
     if val_loss[-1] < best:
         best = val_loss[-1]
@@ -138,3 +135,4 @@ print("Total time elapsed: {:.4f}s".format(time.time() - t_total))
 
 # Restore best model
 print("The best test accuracy : ",best_test)
+
