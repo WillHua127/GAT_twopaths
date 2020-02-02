@@ -45,11 +45,11 @@ adj, features, labels, idx_train, idx_val, idx_test = load_dataset(args.train_pr
 
 # Model and optimizer
 model = GAT(nfeat=features.shape[1], 
-            nhid=args.hidden, 
-            nclass=int(labels.max()) + 1, 
-            dropout=args.dropout, 
-            nheads=args.nb_heads, 
-            alpha=args.alpha)
+                nhid=args.hidden, 
+                nclass=int(labels.max()) + 1, 
+                dropout=args.dropout, 
+                nheads=args.nb_heads, 
+                alpha=args.alpha)
 print("MODEL_BUILT")
 optimizer = optim.Adam(model.parameters(), 
                        lr=args.lr, 
