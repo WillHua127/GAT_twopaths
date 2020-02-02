@@ -37,7 +37,7 @@ class GraphAttentionLayer(nn.Module):
     Sparse version GAT layer, similar to https://arxiv.org/abs/1710.10903
     """
 
-    def __init__(self, in_features, out_features, dropout, alpha, adj, concat=True):
+    def __init__(self, in_features, out_features, dropout, alpha, adj, concat=True, no_cuda=False):
         super(GraphAttentionLayer, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
@@ -66,6 +66,10 @@ class GraphAttentionLayer(nn.Module):
             j += length[i]
             
         self.m = m
+        cuda = not no_cuda and torch.cuda.is_available()
+        if cuda:
+            m = m.cuda()
+            
         self.W_high = nn.Parameter(torch.zeros(size=(in_features, out_features)))
         nn.init.xavier_normal_(self.W_high.data, gain=1.414)
         self.W_low = nn.Parameter(torch.zeros(size=(in_features, out_features)))
