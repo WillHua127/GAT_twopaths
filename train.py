@@ -72,21 +72,17 @@ def train(epoch, model, features, labels, adj, idx_train, idx_val, optimizer):
     t = time.time()    
     model.train()
     optimizer.zero_grad()
-    output = model(features, adj)
+    output = model(features)
     loss_train = F.cross_entropy(output[idx_train], labels[idx_train])
     acc_train = accuracy(output[idx_train], labels[idx_train])
     loss_train.backward()
     optimizer.step()
 
-    if not args.fastmode:
-        # Evaluate validation set performance separately,
-        # deactivates dropout during validation run.
-        model.eval()
-        output = model(features, adj)
-
+    model.eval()
+    output = model(features)
     loss_val = F.cross_entropy(output[idx_val], labels[idx_val])
     acc_val = accuracy(output[idx_val], labels[idx_val])
-    
+
     loss_test = F.cross_entropy(output[idx_test], labels[idx_test])
     acc_test = accuracy(output[idx_test], labels[idx_test])
     
