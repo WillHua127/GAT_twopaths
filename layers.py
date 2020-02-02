@@ -141,8 +141,8 @@ class GraphAttentionLayer(nn.Module):
         assert not torch.isnan(h_prime_high).any()
         # h_prime: N x out
         
-        h_prime_high = h_prime_high.div(e_high_rowsum+1e-9)
-        h_prime_low = h_prime_low.div(e_low_rowsum+1e-9)
+        h_prime_high = h_prime_high.div(e_high_rowsum+1e-16)
+        h_prime_low = h_prime_low.div(e_low_rowsum+1e-16)
         assert not torch.isnan(h_prime_high).any()
         # h_prime: N x out
 
@@ -151,7 +151,7 @@ class GraphAttentionLayer(nn.Module):
 
         if self.concat:
             # if this layer is not last layer,
-            return F.relu6(h_prime)
+            return F.elu6(h_prime)
         else:
             # if this layer is last layer,
             return h_prime
