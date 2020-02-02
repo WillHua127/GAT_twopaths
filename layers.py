@@ -65,10 +65,10 @@ class GraphAttentionLayer(nn.Module):
             m[i, range(j, j + length[i])] = 1
             j += length[i]
             
-        self.m = m
         cuda = not no_cuda and torch.cuda.is_available()
         if cuda:
             m = m.cuda()
+        self.m = m
             
         self.W_high = nn.Parameter(torch.zeros(size=(in_features, out_features)))
         nn.init.xavier_normal_(self.W_high.data, gain=1.414)
