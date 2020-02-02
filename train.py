@@ -72,7 +72,7 @@ def train(epoch, model, features, labels, adj, idx_train, idx_val, optimizer):
     model.train()
     optimizer.zero_grad()
     output = model(features, adj)
-    loss_train = F.nll_loss(output[idx_train], labels[idx_train])
+    loss_train = F.cross_entropy(output[idx_train], labels[idx_train])
     acc_train = accuracy(output[idx_train], labels[idx_train])
     loss_train.backward()
     optimizer.step()
@@ -83,10 +83,10 @@ def train(epoch, model, features, labels, adj, idx_train, idx_val, optimizer):
         model.eval()
         output = model(features, adj)
 
-    loss_val = F.nll_loss(output[idx_val], labels[idx_val])
+    loss_val = F.cross_entropy(output[idx_val], labels[idx_val])
     acc_val = accuracy(output[idx_val], labels[idx_val])
     
-    loss_test = F.nll_loss(output[idx_test], labels[idx_test])
+    loss_test = F.cross_entropy(output[idx_test], labels[idx_test])
     acc_test = accuracy(output[idx_test], labels[idx_test])
     
     print('Epoch: {:04d}'.format(epoch+1),
