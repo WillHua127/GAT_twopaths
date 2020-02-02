@@ -18,10 +18,15 @@ def parse_index_file(filename):
 
 def load_dataset(dataset, dense=True):
     dense_adj, features, labels = torch.load("%s_dense_adj.pt" % dataset), torch.load("%s_features.pt" % dataset), torch.load("%s_labels.pt" % dataset)
-    
+
+    y=140
     s_val = labels[np.random.choice(labels.shape[0], 500, replace=False)]
-    idx_train = range(len(y))
-    idx_val = range(len(y), len(s_val) + 500)
+    if dataset == 'citeseer':
+        y=120
+    elif dataset == 'pubmed':
+        y=60
+    idx_train = range(y)
+    idx_val = range(y, len(s_val) + 500)
     idx_test = range(len(s_val) + 500, len(s_val) + 1500)
     idx_train = torch.LongTensor(idx_train)
     idx_val = torch.LongTensor(idx_val)

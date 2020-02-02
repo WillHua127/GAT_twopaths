@@ -6,7 +6,7 @@ from layers import GraphAttentionLayer
 class GAT(nn.Module):
     def __init__(self, nfeat, nhid, nclass, dropout, alpha, nheads):
         """Sparse version of GAT."""
-        super(SpGAT, self).__init__()
+        super(GAT, self).__init__()
         self.dropout = dropout
 
         self.attentions = [GraphAttentionLayer(nfeat, 

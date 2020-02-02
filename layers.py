@@ -38,7 +38,7 @@ class GraphAttentionLayer(nn.Module):
     """
 
     def __init__(self, in_features, out_features, dropout, alpha, concat=True):
-        super(SpGraphAttentionLayer, self).__init__()
+        super(GraphAttentionLayer, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.alpha = alpha
