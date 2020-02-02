@@ -9,7 +9,7 @@ class GAT(nn.Module):
         super(SpGAT, self).__init__()
         self.dropout = dropout
 
-        self.attentions = [SpGraphAttentionLayer(nfeat, 
+        self.attentions = [GraphAttentionLayer(nfeat, 
                                                  nhid, 
                                                  dropout=dropout, 
                                                  alpha=alpha, 
@@ -17,7 +17,7 @@ class GAT(nn.Module):
         for i, attention in enumerate(self.attentions):
             self.add_module('attention_{}'.format(i), attention)
 
-        self.out_att = SpGraphAttentionLayer(nhid * nheads, 
+        self.out_att = GraphAttentionLayer(nhid * nheads, 
                                              nclass, 
                                              dropout=dropout, 
                                              alpha=alpha, 
