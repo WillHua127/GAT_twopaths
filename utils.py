@@ -16,7 +16,7 @@ def parse_index_file(filename):
         index.append(int(line.strip()))
     return index
 
-def load_dataset(dataset, dense=True):
+def load_dataset(dataset, dense=False):
     dense_adj, features, labels = torch.load("%s_dense_adj.pt" % dataset), torch.load("%s_features.pt" % dataset), torch.load("%s_labels.pt" % dataset)
 
     y=140
