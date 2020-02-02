@@ -84,10 +84,10 @@ class GraphAttentionLayer(nn.Module):
         self.leakyrelu = nn.LeakyReLU(self.alpha)
         self.special_spmm = SpecialSpmm()
 
-    def forward(self, input, adj):
+    def forward(self, input):
         dv = 'cuda' if input.is_cuda else 'cpu'
 
-        N = input.size()[0]
+        N = self.adj.size()[0]
         edge = self.edge
 
         h_high = torch.mm(input, self.W_high)
