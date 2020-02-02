@@ -49,7 +49,8 @@ model = GAT(nfeat=features.shape[1],
                 nclass=int(labels.max()) + 1, 
                 dropout=args.dropout, 
                 nheads=args.nb_heads, 
-                alpha=args.alpha)
+                alpha=args.alpha,
+                adj=adj)
 print("MODEL_BUILT")
 optimizer = optim.Adam(model.parameters(), 
                        lr=args.lr, 
