@@ -119,7 +119,7 @@ class GraphAttentionLayer(nn.Module):
 
         if self.concat:
             # if this layer is not last layer,
-            return F.elu(h_prime)
+            return F.relu6(h_prime)
         else:
             # if this layer is last layer,
             return h_prime
