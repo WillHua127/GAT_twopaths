@@ -31,6 +31,7 @@ parser.add_argument('--dropout', type=float, default=0.7, help='Dropout rate (1 
 parser.add_argument('--alpha', type=float, default=0.3, help='Alpha for the leaky_relu.')
 parser.add_argument('--patience', type=int, default=50, help='Patience')
 parser.add_argument('--runtimes', type=int, default=5, help='Runtim')
+parser.add_argument('--identifier', type=int, default=1234567, help='Identifier for the job')
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -136,4 +137,4 @@ for runtime in range(args.runtimes):
     print("The best test accuracy this tuntime : ",best_test)
     del model, optimizer
 print("The average test accuracy : ", np.mean(best_tests), "The test variance : ", np.var(best_tests), "The test variance : ", np.std(best_tests))
-
+script = open("%d.txt" % args.identifier, 'w'); script.write("%e" % np.mean(best_tests)); script.close()
