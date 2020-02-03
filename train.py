@@ -18,7 +18,9 @@ from models import GAT
 
 # Training settings
 parser = argparse.ArgumentParser()
-parser.add_argument('--train_prefix', type=str, default='cora', help='prefix identifying training data. cora, pubmed, citeseer.') 
+parser.add_argument('--network', type=str, default='gcn_onepath', help='network model.') 
+parser.add_argument('--public', type=int, default=1, help='split data') 
+parser.add_argument('--dataset', type=str, default='cora', help='prefix identifying training data. cora, pubmed, citeseer.') 
 parser.add_argument('--no-cuda', action='store_true', default=False, help='Disables CUDA training.')
 parser.add_argument('--fastmode', action='store_true', default=False, help='Validate during training pass.')
 parser.add_argument('--seed', type=int, default=72, help='Random seed.')
@@ -29,7 +31,7 @@ parser.add_argument('--hidden', type=int, default=1, help='Number of hidden unit
 parser.add_argument('--nb_heads', type=int, default=1, help='Number of head attentions.')
 parser.add_argument('--dropout', type=float, default=0.7, help='Dropout rate (1 - keep probability).')
 parser.add_argument('--alpha', type=float, default=0.3, help='Alpha for the leaky_relu.')
-parser.add_argument('--patience', type=int, default=50, help='Patience')
+parser.add_argument('--patience', type=int, default=200, help='Patience')
 parser.add_argument('--runtimes', type=int, default=5, help='Runtim')
 parser.add_argument('--identifier', type=int, default=1234567, help='Identifier for the job')
 
