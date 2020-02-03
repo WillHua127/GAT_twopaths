@@ -138,5 +138,5 @@ for runtime in range(args.runtimes):
     best_tests.append(best_test)
     print("The best test accuracy this tuntime : ",best_test)
     del model, optimizer
-print("The average test accuracy : ", np.mean(best_tests), "The test variance : ", np.var(best_tests), "The test variance : ", np.std(best_tests))
+print("The average test accuracy : ", np.mean(best_tests), "The test variance : ", np.var(best_tests), "The test standard deviation : ", np.std(best_tests))
 script = open("%d.txt" % args.identifier, 'w'); script.write("%e" % np.mean(best_tests)); script.close()
