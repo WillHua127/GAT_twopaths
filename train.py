@@ -30,6 +30,7 @@ parser.add_argument('--nb_heads', type=int, default=1, help='Number of head atte
 parser.add_argument('--dropout', type=float, default=0.7, help='Dropout rate (1 - keep probability).')
 parser.add_argument('--alpha', type=float, default=0.3, help='Alpha for the leaky_relu.')
 parser.add_argument('--patience', type=int, default=50, help='Patience')
+parser.add_argument('--runtimes', type=int, default=5, help='Runtim')
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -42,19 +43,6 @@ if args.cuda:
 
 # Load data
 adj, features, labels, idx_train, idx_val, idx_test = load_dataset(args.train_prefix)
-
-# Model and optimizer
-model = GAT(nfeat=features.shape[1], 
-                nhid=args.hidden, 
-                nclass=int(labels.max()) + 1, 
-                dropout=args.dropout, 
-                nheads=args.nb_heads, 
-                alpha=args.alpha,
-                adj=adj)
-print("MODEL_BUILT")
-optimizer = optim.Adam(model.parameters(), 
-                       lr=args.lr, 
-                       weight_decay=args.weight_decay)
 
 if args.cuda:
     model.cuda()
@@ -94,7 +82,7 @@ def train(epoch, model, features, labels, adj, idx_train, idx_val, optimizer):
           'loss_test: {:.4f}'.format(loss_test.data.item()),
           'acc_test: {:.4f}'.format(acc_test),
           'time: {:.4f}s'.format(time.time() - t))
-    return loss_val.data.item(), acc_test
+    return loss_val.data.item(), acc_test.data.item()
 
 
 def accuracy(output, labels):
@@ -104,32 +92,48 @@ def accuracy(output, labels):
     return correct / len(labels)
 
 # Train model
-t_total = time.time()
-test_acc = []
-val_loss = []
-bad_counter = 0
-best_test = 0
-best = args.epochs + 1
-best_epoch = 0
-for epoch in range(args.epochs):
-    loss, acc = train(epoch, model, features, labels, adj, idx_train, idx_val, optimizer)
-    val_loss.append(loss)
-    test_acc.append(acc)
+best_tests = []
+for runtime in range(args.runtimes):
+    model = GAT(nfeat=features.shape[1], 
+                nhid=args.hidden, 
+                nclass=int(labels.max()) + 1, 
+                dropout=args.dropout, 
+                nheads=args.nb_heads, 
+                alpha=args.alpha,
+                adj=adj)
+    print("MODEL_BUILT")
+    optimizer = optim.Adam(model.parameters(), 
+                           lr=args.lr, 
+                           weight_decay=args.weight_decay)
+    t_total = time.time()
+    test_acc = []
+    val_loss = []
+    bad_counter = 0
+    best_test = 0
+    best = args.epochs + 1
+    best_epoch = 0
+    for epoch in range(args.epochs):
+        loss, acc = train(epoch, model, features, labels, adj, idx_train, idx_val, optimizer)
+        val_loss.append(loss)
+        test_acc.append(acc)
 
-    if val_loss[-1] < best:
-        best = val_loss[-1]
-        best_test = test_acc[-1]
-        best_epoch = epoch
-        bad_counter = 0
-    else:
-        bad_counter += 1
+        if val_loss[-1] < best:
+            best = val_loss[-1]
+            best_test = test_acc[-1]
+            best_epoch = epoch
+            bad_counter = 0
+        else:
+            bad_counter += 1
 
-    if bad_counter == args.patience:
-        break
-        
-print("Optimization Finished!")
-print("Total time elapsed: {:.4f}s".format(time.time() - t_total))
+        if bad_counter == args.patience:
+            break
+            
+    print("Optimization Finished!")
+    print("Total time elapsed: {:.4f}s".format(time.time() - t_total))
 
-# Restore best model
-print("The best test accuracy : ",best_test)
+    # Restore best model
+    best_tests.append(best_test)
+    print("The best test accuracy this tuntime : ",best_test)
+    del model, optimizer
+print("The average test accuracy : ", np.mean(best_tests), "The test variance : ", np.var(best_tests), "The test variance : ", np.std(best_tests))
 
