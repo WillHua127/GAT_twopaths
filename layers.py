@@ -101,6 +101,8 @@ class GraphAttentionLayer(nn.Module):
 
         h_high = torch.mm(input, self.W_high)
         h_low = torch.mm(input, self.W_low)
+        h_high = self.leakyrelu(h_high)
+        h_low = self.leakyrelu(h_low)
         # h: N x out
         assert not torch.isnan(h_high).any()
         
@@ -120,9 +122,7 @@ class GraphAttentionLayer(nn.Module):
         assert not torch.isnan(e_high_rowsum).any()
         # e_rowsum: N x 1
 
-        edge_e_high = F.relu6(edge_e_high)
         edge_e_high = self.dropout(edge_e_high)
-        edge_e_low = F.relu6(edge_e_low)
         edge_e_low = self.dropout(edge_e_low)
         assert not torch.isnan(edge_e_high).any()
         # edge_e: E
@@ -141,8 +141,8 @@ class GraphAttentionLayer(nn.Module):
         assert not torch.isnan(h_prime_high).any()
         # h_prime: N x out
         
-        h_prime_high = h_prime_high.div(e_high_rowsum+1e-16)
-        h_prime_low = h_prime_low.div(e_low_rowsum+1e-16)
+        h_prime_high = h_prime_high.div(e_high_rowsum+1e-9)
+        h_prime_low = h_prime_low.div(e_low_rowsum+1e-9)
         assert not torch.isnan(h_prime_high).any()
         # h_prime: N x out
 
@@ -151,7 +151,7 @@ class GraphAttentionLayer(nn.Module):
 
         if self.concat:
             # if this layer is not last layer,
-            return F.elu6(h_prime)
+            return F.elu(h_prime)
         else:
             # if this layer is last layer,
             return h_prime
