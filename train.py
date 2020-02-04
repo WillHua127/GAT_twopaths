@@ -102,7 +102,8 @@ for runtime in range(args.runtimes):
                 dropout=args.dropout, 
                 nheads=args.nb_heads, 
                 alpha=args.alpha,
-                adj=adj)
+                adj=adj,
+                dataset = args.dataset)
     print("MODEL_BUILT")
     optimizer = optim.Adam(model.parameters(), 
                            lr=args.lr, 
