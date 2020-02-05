@@ -118,12 +118,10 @@ class GraphAttentionLayer(nn.Module):
         assert not torch.isnan(h_high).any()
 
         input1 = torch.add((h_high[edge[0, :], :]), h_high[edge[1, :], :])
-        if self.concat:
-            # if this layer is not last layer,
-            input2 = torch.sub(h_low[edge[0, :], :], h_low[edge[1, :], :])
-        else:
+        input2 = torch.sub(h_low[edge[0, :], :], h_low[edge[1, :], :])
+        #if not self.concat:
             # if this layer is last layer,
-            input2 = torch.add((h_high[edge[0, :], :]), h_high[edge[1, :], :])
+        #    input2 = torch.add((h_high[edge[0, :], :]), h_high[edge[1, :], :])
         
         # Self-attention on the nodes - Shared attention mechanism
         edge_h_high = torch.cat((beta_high*h_high[edge[0, :], :], (2-beta_high)*h_high[edge[1, :], :], gamma_high*input1, (2-gamma_high)*input2), dim=1).t()
@@ -172,6 +170,7 @@ class GraphAttentionLayer(nn.Module):
             return self.relu_bt(h_prime)
         else:
             # if this layer is last layer,
+            h_prime = h_prime_high
             return self.relu_bt(h_prime)
 
     def __repr__(self):
