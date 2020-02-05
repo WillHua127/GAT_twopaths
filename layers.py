@@ -74,6 +74,10 @@ class GraphAttentionLayer(nn.Module):
         nn.init.xavier_uniform_(self.g_low.data, gain=1)
         self.b_low = nn.Parameter(torch.zeros(size=(1, 1)))
         nn.init.xavier_uniform_(self.b_low.data, gain=1)
+        self.c_low = nn.Parameter(torch.zeros(size=(1, 1)))
+        nn.init.xavier_uniform_(self.c_low.data, gain=1)
+        self.c_high = nn.Parameter(torch.zeros(size=(1, 1)))
+        nn.init.xavier_uniform_(self.c_high.data, gain=1)
 
         self.dropout = nn.Dropout(dropout)
         self.leakyrelu = nn.LeakyReLU(self.alpha)
@@ -107,6 +111,8 @@ class GraphAttentionLayer(nn.Module):
         beta_high = self.gam(self.b_high)
         gamma_low = self.gam(self.g_low)
         beta_low = self.gam(self.b_low)
+        theta_low = self.gam(self.c_low)/2
+        theta_high = self.gam(self.c_high)/2
         #c_high = self.gam(self.c_high)
         #c_low = self.gam(self.c_low) - 1
 
@@ -154,8 +160,8 @@ class GraphAttentionLayer(nn.Module):
         assert not torch.isnan(h_prime_high).any()
         # h_prime: N x out
         
-        h_prime_high = h_prime_high.div(e_high_rowsum+1e-16)
-        h_prime_low = h_prime_low.div(e_low_rowsum+1e-16)
+        h_prime_high = h_prime_high.div(e_high_rowsum+theta_high)
+        h_prime_low = h_prime_low.div(e_low_rowsum+theta_low)
         assert not torch.isnan(h_prime_high).any()
         # h_prime: N x out
 
@@ -171,6 +177,8 @@ class GraphAttentionLayer(nn.Module):
         else:
             # if this layer is last layer,
             h_prime = h_prime_high
+            agg = torch.matmul(self.m, h_high[edge[1, :], :])
+            h_prime = torch.add(h_prime, agg)
             return self.relu_bt(h_prime)
 
     def __repr__(self):
