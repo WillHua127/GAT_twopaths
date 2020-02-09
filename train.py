@@ -116,20 +116,19 @@ for runtime in range(args.runtimes):
     val_loss = []
     bad_counter = 0
     best_test = 0
-    best = args.epochs + 1
-    best_epoch = 0
+    best = 100000
     for epoch in range(args.epochs):
         loss, acc = train(epoch, model, features, labels, adj, idx_train, idx_val, optimizer)
         val_loss.append(loss)
         test_acc.append(acc)
 
-        if val_loss[-1] < best:
-            best = val_loss[-1]
-            best_test = test_acc[-1]
-            best_epoch = epoch
-            bad_counter = 0
-        else:
-            bad_counter += 1
+        if epoch > 20:
+            if val_loss[-1] < best:
+                best = val_loss[-1]
+                best_test = test_acc[-1]
+                bad_counter = 0
+            else:
+                bad_counter += 1
 
         if bad_counter == args.patience:
             break
