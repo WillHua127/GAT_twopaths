@@ -32,7 +32,7 @@ parser.add_argument('--nb_heads', type=int, default=16, help='Number of head att
 parser.add_argument('--dropout', type=float, default=0.7, help='Dropout rate (1 - keep probability).')
 parser.add_argument('--alpha', type=float, default=0.3, help='Alpha for the leaky_relu.')
 parser.add_argument('--patience', type=int, default=200, help='Patience')
-parser.add_argument('--runtimes', type=int, default=5, help='Runtim')
+parser.add_argument('--runtimes', type=int, default=2, help='Runtim')
 parser.add_argument('--identifier', type=int, default=1234567, help='Identifier for the job')
 
 args = parser.parse_args()
