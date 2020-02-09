@@ -56,9 +56,9 @@ class GraphAttentionLayer(nn.Module):
         self.W_low = nn.Parameter(torch.zeros(size=(in_features, out_features)))
         nn.init.xavier_normal_(self.W_low.data, gain=1.414)
                 
-        self.a_high = nn.Parameter(torch.zeros(size=(1, 4*out_features)))
+        self.a_high = nn.Parameter(torch.zeros(size=(1, 3*out_features)))
         nn.init.xavier_normal_(self.a_high.data, gain=1.414)
-        self.a_low = nn.Parameter(torch.zeros(size=(1, 4*out_features)))
+        self.a_low = nn.Parameter(torch.zeros(size=(1, 3*out_features)))
         nn.init.xavier_normal_(self.a_low.data, gain=1.414)
         
         #self.c_high = nn.Parameter(torch.zeros(size=(1, 1)))
@@ -130,8 +130,9 @@ class GraphAttentionLayer(nn.Module):
         #    input2 = torch.add((h_high[edge[0, :], :]), h_high[edge[1, :], :])
         
         # Self-attention on the nodes - Shared attention mechanism
-        edge_h_high = torch.cat((beta_high*h_high[edge[0, :], :], (2-beta_high)*h_high[edge[1, :], :], gamma_high*input1, (2-gamma_high)*input2), dim=1).t()
-        edge_h_low = torch.cat((beta_low*h_low[edge[0, :], :], (2-beta_low)*h_low[edge[1, :], :], gamma_low*input1, (2-gamma_low)*input2), dim=1).t()
+        edge_h_high = torch.cat((beta_high*h_high[edge[0, :], :], (2-beta_high)*h_high[edge[1, :], :], input1), dim=1).t()
+        edge_h_low = torch.cat((beta_low*h_low[edge[0, :], :], (2-beta_low)*h_low[edge[1, :], :], input2), dim=1).t()
+
         assert not torch.isnan(edge_h_high).any()
         # edge: 2*D x E
 
@@ -176,9 +177,9 @@ class GraphAttentionLayer(nn.Module):
             return self.relu_bt(h_prime)
         else:
             # if this layer is last layer,
-            h_prime = h_prime_high
-            agg = torch.matmul(self.m, h_high[edge[1, :], :])
-            h_prime = torch.add(h_prime, agg)
+            #h_prime = h_prime_high
+            #agg = torch.matmul(self.m, h_high[edge[1, :], :])
+            #h_prime = torch.add(h_prime, agg)
             return self.relu_bt(h_prime)
 
     def __repr__(self):
