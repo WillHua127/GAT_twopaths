@@ -56,9 +56,9 @@ class GraphAttentionLayer(nn.Module):
         self.W_low = nn.Parameter(torch.zeros(size=(in_features, out_features)))
         nn.init.xavier_normal_(self.W_low.data, gain=1.414)
                 
-        self.a_high = nn.Parameter(torch.zeros(size=(1, 3*out_features)))
+        self.a_high = nn.Parameter(torch.zeros(size=(1, 2*out_features)))
         nn.init.xavier_normal_(self.a_high.data, gain=1.414)
-        self.a_low = nn.Parameter(torch.zeros(size=(1, 3*out_features)))
+        self.a_low = nn.Parameter(torch.zeros(size=(1, 2*out_features)))
         nn.init.xavier_normal_(self.a_low.data, gain=1.414)
         
         #self.c_high = nn.Parameter(torch.zeros(size=(1, 1)))
@@ -66,14 +66,14 @@ class GraphAttentionLayer(nn.Module):
         #self.c_low = nn.Parameter(torch.zeros(size=(1, 1)))
         #nn.init.xavier_uniform_(self.c_low.data, gain=1)
 
-        self.g_high = nn.Parameter(torch.zeros(size=(1, 1)))
-        nn.init.xavier_uniform_(self.g_high.data, gain=1)
-        self.b_high = nn.Parameter(torch.zeros(size=(1, 1)))
-        nn.init.xavier_uniform_(self.b_high.data, gain=1)
-        self.g_low = nn.Parameter(torch.zeros(size=(1, 1)))
-        nn.init.xavier_uniform_(self.g_low.data, gain=1)
-        self.b_low = nn.Parameter(torch.zeros(size=(1, 1)))
-        nn.init.xavier_uniform_(self.b_low.data, gain=1)
+        #self.g_high = nn.Parameter(torch.zeros(size=(1, 1)))
+        #nn.init.xavier_uniform_(self.g_high.data, gain=1)
+        #self.b_high = nn.Parameter(torch.zeros(size=(1, 1)))
+        #nn.init.xavier_uniform_(self.b_high.data, gain=1)
+        #self.g_low = nn.Parameter(torch.zeros(size=(1, 1)))
+        #nn.init.xavier_uniform_(self.g_low.data, gain=1)
+        #self.b_low = nn.Parameter(torch.zeros(size=(1, 1)))
+        #nn.init.xavier_uniform_(self.b_low.data, gain=1)
         self.c_low = nn.Parameter(torch.zeros(size=(1, 1)))
         nn.init.xavier_uniform_(self.c_low.data, gain=1)
         self.c_high = nn.Parameter(torch.zeros(size=(1, 1)))
@@ -107,10 +107,10 @@ class GraphAttentionLayer(nn.Module):
             N = input.size()[0]
         edge = self.edge
 
-        gamma_high = self.gam(self.g_high)
-        beta_high = self.gam(self.b_high)
-        gamma_low = self.gam(self.g_low)
-        beta_low = self.gam(self.b_low)
+        #gamma_high = self.gam(self.g_high)
+        #beta_high = self.gam(self.b_high)
+        #gamma_low = self.gam(self.g_low)
+        #beta_low = self.gam(self.b_low)
         theta_low = self.gam(self.c_low)/2
         theta_high = self.gam(self.c_high)/2
         #c_high = self.gam(self.c_high)
@@ -130,9 +130,10 @@ class GraphAttentionLayer(nn.Module):
         #    input2 = torch.add((h_high[edge[0, :], :]), h_high[edge[1, :], :])
         
         # Self-attention on the nodes - Shared attention mechanism
-        edge_h_high = torch.cat((beta_high*h_high[edge[0, :], :], (2-beta_high)*h_high[edge[1, :], :], input1), dim=1).t()
-        edge_h_low = torch.cat((beta_low*h_low[edge[0, :], :], (2-beta_low)*h_low[edge[1, :], :], input2), dim=1).t()
-
+        #edge_h_high = torch.cat((beta_high*h_high[edge[0, :], :], (2-beta_high)*h_high[edge[1, :], :], input1), dim=1).t()
+        #edge_h_low = torch.cat((beta_low*h_low[edge[0, :], :], (2-beta_low)*h_low[edge[1, :], :], input2), dim=1).t()
+        edge_h_high = torch.cat((h_high[edge[0, :], :], input1), dim=1).t()
+        edge_h_low = torch.cat((h_low[edge[1, :], :], input2), dim=1).t()
         assert not torch.isnan(edge_h_high).any()
         # edge: 2*D x E
 
