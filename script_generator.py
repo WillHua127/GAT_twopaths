@@ -25,7 +25,7 @@ parser.add_argument('--patience', type=int, default=200, help='Patience')
 args = parser.parse_args()
 
 if args.implementation == 'pytorch':
-    folder_exec = '~/scratch/GAT_twopaths'
+    folder_exec = '~/scratch/GAT'
     location_image = '~/scratch/pytorch_20.01-py3.sif'
 elif args.implementation == 'tensorflow':
     folder_exec = '~/scratch/Stronger-GCN-TF2'
