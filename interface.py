@@ -8,7 +8,7 @@ parser.add_argument('--implementation', type=str, default="pytorch", help='tenso
 args = parser.parse_args()
 
 if args.implementation == 'pytorch':
-    folder_exec = '~/scratch/GAT_twopaths'
+    folder_exec = '~/scratch/GAT'
 elif args.implementation == 'tensorflow':
     folder_exec = '~/scratch/Stronger-GCN-TF2'
 
