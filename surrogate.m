@@ -6,7 +6,7 @@ suffix = [suffix, '--public', ' ', num2str(public), ' '];
 hp_names = HPT.Properties.VariableNames;
 for i = 1: numel(hp_names)
     if strcmp(hp_names{i}, 'hidden')
-        HPT{1, hp_names{i}} = 4 * HPT{1, hp_names{i}};
+        HPT{1, hp_names{i}} = 10 * HPT{1, hp_names{i}};
         hp_names{i} = 'hidden';
     end
 end
