@@ -1,5 +1,5 @@
 %% experiment settings
-network = 'gcn_twopath'; dataset = 'cora';
+network = 'gcn_onepath'; dataset = 'cora';
 public = 1; MaxObjectiveEvaluations = 1024;
 filename = construct_filename(dataset, network);
 lr = optimizableVariable('lr', [1e-8, 1e-2]);
