@@ -118,8 +118,8 @@ class GraphAttentionLayer(nn.Module):
 
         h_high = torch.mm(input, self.W_high)
         h_low = torch.mm(input, self.W_low)
-        h_high = self.relu_bt(h_high)
-        h_low = self.relu_bt(h_low)
+        #h_high = self.relu_bt(h_high)
+        #h_low = self.relu_bt(h_low)
         # h: N x out
         assert not torch.isnan(h_high).any()
 
@@ -132,8 +132,11 @@ class GraphAttentionLayer(nn.Module):
         # Self-attention on the nodes - Shared attention mechanism
         #edge_h_high = torch.cat((beta_high*h_high[edge[0, :], :], (2-beta_high)*h_high[edge[1, :], :], input1), dim=1).t()
         #edge_h_low = torch.cat((beta_low*h_low[edge[0, :], :], (2-beta_low)*h_low[edge[1, :], :], input2), dim=1).t()
-        edge_h_high = torch.cat((h_high[edge[0, :], :], input1), dim=1).t()
-        edge_h_low = torch.cat((h_low[edge[1, :], :], input2), dim=1).t()
+        #edge_h_high = torch.cat((h_high[edge[0, :], :], input1), dim=1).t()
+        #edge_h_low = torch.cat((h_low[edge[1, :], :], input2), dim=1).t()
+        edge_h_high = torch.cat((h_high[edge[0, :], :], h_high[edge[1, :], :]), dim=1).t()
+        edge_h_low = torch.cat((h_low[edge[0, :], :], h_low[edge[1, :], :]), dim=1).t()
+        
         assert not torch.isnan(edge_h_high).any()
         # edge: 2*D x E
 
@@ -175,13 +178,15 @@ class GraphAttentionLayer(nn.Module):
 
         if self.concat:
             # if this layer is not last layer,
-            return self.relu_bt(h_prime)
+            #return self.relu_bt(h_prime)
+            return F.elu(h_prime)
         else:
             # if this layer is last layer,
             #h_prime = h_prime_high
             #agg = torch.matmul(self.m, h_high[edge[1, :], :])
             #h_prime = torch.add(h_prime, agg)
-            return self.relu_bt(h_prime)
+            #return self.relu_bt(h_prime)
+            return h_prime
 
     def __repr__(self):
         return self.__class__.__name__ + ' (' + str(self.in_features) + ' -> ' + str(self.out_features) + ')'
