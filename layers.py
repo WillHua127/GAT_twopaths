@@ -57,11 +57,14 @@ class GraphAttentionLayer(nn.Module):
         #self.W_low = nn.Parameter(torch.zeros(size=(2*in_features, out_features)))
         
         #if concat==True:
-        self.W_high = nn.Parameter(torch.zeros(size=(in_features, out_features)))
-        self.W_low = nn.Parameter(torch.zeros(size=(in_features, out_features)))
+        #self.W_high = nn.Parameter(torch.zeros(size=(in_features, out_features)))
+        #self.W_low = nn.Parameter(torch.zeros(size=(in_features, out_features)))
 
-        nn.init.xavier_normal_(self.W_high.data, gain=1.414)
-        nn.init.xavier_normal_(self.W_low.data, gain=1.414)
+        self.W = nn.Parameter(torch.zeros(size=(in_features, out_features)))
+
+        #nn.init.xavier_normal_(self.W_high.data, gain=1.414)
+        #nn.init.xavier_normal_(self.W_low.data, gain=1.414)
+        nn.init.xavier_normal_(self.W.data, gain=1.414)
                 
         self.a_high = nn.Parameter(torch.zeros(size=(1, 4*out_features)))
         nn.init.xavier_normal_(self.a_high.data, gain=1.414)
@@ -123,17 +126,26 @@ class GraphAttentionLayer(nn.Module):
         c_high = self.gam(self.c_high)
         c_low = self.gam(self.c_low) -1
 
-        h_high = torch.mm(input, self.W_high)
-        h_low = torch.mm(input, self.W_low)
-        h_high = self.relu_bt(h_high)
-        h_low = self.relu_bt(h_low)
+        #h_high = torch.mm(input, self.W_high)
+        #h_low = torch.mm(input, self.W_low)
+        #h_high = torch.mm(input, self.W)
+        #h_low = torch.mm(input, self.W)
+        #h_high = self.relu_bt(h_high)
+        #h_low = self.relu_bt(h_low)
+        h = torch.mm(input, self.W)
+        h = self.relu_bt(h)
         # h: N x out
-        assert not torch.isnan(h_high).any()
+        #assert not torch.isnan(h_high).any()
+        assert not torch.isnan(h).any()
 
-        input1 = torch.add((h_high[edge[0, :], :]), h_high[edge[1, :], :])
-        high_sub = torch.sub((h_high[edge[1, :], :]), h_high[edge[0, :], :])
-        input2 = torch.sub(h_low[edge[1, :], :], h_low[edge[0, :], :])
-        low_agg = torch.add(h_low[edge[0, :], :], h_low[edge[1, :], :])
+        #input1 = torch.add((h_high[edge[0, :], :]), h_high[edge[1, :], :])
+        #high_sub = torch.sub((h_high[edge[1, :], :]), h_high[edge[0, :], :])
+        #input2 = torch.sub(h_low[edge[1, :], :], h_low[edge[0, :], :])
+        h_add = torch.add((h[edge[0, :], :]), h[edge[1, :], :])
+        h_sub = torch.sub((h[edge[1, :], :]), h[edge[0, :], :])
+        #h_add = self.relu_bt(h_add)
+        #h_sub = self.relu_bt(h_sub)
+        #low_agg = torch.add(h_low[edge[0, :], :], h_low[edge[1, :], :])
         
         #input1 = self.relu_bt(input1)
         #input2 = self.relu_bt(input2)
@@ -146,18 +158,21 @@ class GraphAttentionLayer(nn.Module):
         # Self-attention on the nodes - Shared attention mechanism
         #edge_h_high = torch.cat((beta_high*h_high[edge[0, :], :], (2-beta_high)*h_high[edge[1, :], :], input1), dim=1).t()
         #edge_h_low = torch.cat((beta_low*h_low[edge[0, :], :], (2-beta_low)*h_low[edge[1, :], :], input2), dim=1).t()
-        edge_h_high = torch.cat((h_high[edge[0, :], :], h_high[edge[1, :], :], input1, high_sub), dim=1).t()
-        edge_h_low = torch.cat((h_low[edge[0, :], :], h_low[edge[1, :], :], low_agg, input2), dim=1).t()
+        #edge_h_high = torch.cat((h_high[edge[0, :], :], h_high[edge[1, :], :], input1, high_sub), dim=1).t()
+        #edge_h_low = torch.cat((h_low[edge[0, :], :], h_low[edge[1, :], :], low_agg, input2), dim=1).t()
+        edge_h = torch.cat((h[edge[0, :], :], h[edge[1, :], :], h_add, h_sub), dim=1).t()
+
         #edge_h_high = torch.cat((h_high[edge[0, :], :], h_high[edge[1, :], :]), dim=1).t()
         #edge_h_low = torch.cat((h_low[edge[0, :], :], h_low[edge[1, :], :]), dim=1).t()
         
-        assert not torch.isnan(edge_h_high).any()
+        #assert not torch.isnan(edge_h_high).any()
+        assert not torch.isnan(edge_h).any()
         # edge: 2*D x E
 
-        #edge_e_high = torch.exp(-self.leakyrelu(torch.div(self.a_high.mm(edge_h_high).squeeze(), torch.norm(self.a_high))))
-        #edge_e_low = torch.exp(-self.leakyrelu(torch.div(self.a_low.mm(edge_h_low).squeeze(), torch.norm(self.a_low))))
-        edge_e_high = torch.exp(-self.leakyrelu(self.a_high.mm(edge_h_high).squeeze()))
-        edge_e_low = torch.exp(-self.leakyrelu(self.a_low.mm(edge_h_low).squeeze()))
+        edge_e_high = torch.exp(-self.leakyrelu(torch.div(self.a_high.mm(edge_h).squeeze(), torch.norm(self.a_high))))
+        edge_e_low = torch.exp(-self.leakyrelu(torch.div(self.a_low.mm(edge_h).squeeze(), torch.norm(self.a_low))))
+        #edge_e_high = torch.exp(-self.leakyrelu(self.a_high.mm(edge_h_high).squeeze()))
+        #edge_e_low = torch.exp(-self.leakyrelu(self.a_low.mm(edge_h_low).squeeze()))
         assert not torch.isnan(edge_e_high).any()
         # edge_e: E
 
@@ -172,8 +187,8 @@ class GraphAttentionLayer(nn.Module):
         # e_rowsum: N x 1
 
         
-        h_high = torch.matmul(self.m, input1)
-        h_low = torch.matmul(self.m, input2)
+        h_high = torch.matmul(self.m, h_add)
+        h_low = torch.matmul(self.m, h_sub)
         h_high = self.relu_bt(h_high)
         h_low = self.relu_bt(h_low)
         #assert not torch.isnan(h_high).any()
