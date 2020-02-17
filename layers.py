@@ -36,7 +36,7 @@ class GraphAttentionLayer(nn.Module):
     Sparse version GAT layer, similar to https://arxiv.org/abs/1710.10903
     """
 
-    def __init__(self, in_features, out_features, dropout, alpha, adj, dataset, edge, concat=True, no_cuda=False):
+    def __init__(self, in_features, out_features, dropout, alpha, adj, dataset, edge, m, concat=True, no_cuda=False):
         super(GraphAttentionLayer, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
@@ -45,9 +45,12 @@ class GraphAttentionLayer(nn.Module):
         self.adj = adj
         self.dataset = dataset
         self.edge = edge
+        self.m = m
         
         cuda = not no_cuda and torch.cuda.is_available()
-    
+        if cuda:
+            self.m = self.m.cuda()
+
         if concat==False:
             in_features = 2*in_features
         self.W_high = nn.Parameter(torch.zeros(size=(in_features, out_features)))
@@ -170,12 +173,15 @@ class GraphAttentionLayer(nn.Module):
         #assert not torch.isnan(edge_h).any()
         # edge: 2*D x E
 
+
+        #high_norm = torch.norm(self.a_high) * torch.norm(edge_h_high)
+        #low_norm = torch.norm(self.a_low) * torch.norm(edge_h_high)
         #edge_e_high = torch.exp(-self.leakyrelu(torch.div(self.a_high.mm(edge_h).squeeze(), torch.norm(self.a_high))))
-        edge_e_high = torch.exp(-self.leakyrelu(torch.div(self.a_high.mm(edge_h_high).squeeze(), torch.norm(self.a_high))))
+        #edge_e_high = torch.exp(-self.leakyrelu(torch.div(self.a_high.mm(edge_h_high).squeeze(), torch.norm(self.a_high))))
         #edge_e_low = torch.exp(-self.leakyrelu(torch.div(self.a_low.mm(edge_h).squeeze(), torch.norm(self.a_low))))
-        edge_e_low = torch.exp(-self.leakyrelu(torch.div(self.a_low.mm(edge_h_low).squeeze(), torch.norm(self.a_low))))
-        #edge_e_high = torch.exp(-self.leakyrelu(self.a_high.mm(edge_h_high).squeeze()))
-        #edge_e_low = torch.exp(-self.leakyrelu(self.a_low.mm(edge_h_low).squeeze()))
+        #edge_e_low = torch.exp(-self.leakyrelu(torch.div(self.a_low.mm(edge_h_low).squeeze(), torch.norm(self.a_low))))
+        edge_e_high = torch.exp(-self.leakyrelu(self.a_high.mm(edge_h_high).squeeze()))
+        edge_e_low = torch.exp(-self.leakyrelu(self.a_low.mm(edge_h_low).squeeze()))
         assert not torch.isnan(edge_e_high).any()
         # edge_e: E
 
