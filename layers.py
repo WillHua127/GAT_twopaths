@@ -66,9 +66,9 @@ class GraphAttentionLayer(nn.Module):
         nn.init.xavier_normal_(self.W_low.data, gain=1.414)
         #nn.init.xavier_normal_(self.W.data, gain=1.414)
                 
-        self.a_high = nn.Parameter(torch.zeros(size=(1, 4*out_features)))
+        self.a_high = nn.Parameter(torch.zeros(size=(1, 1*out_features)))
         nn.init.xavier_normal_(self.a_high.data, gain=1.414)
-        self.a_low = nn.Parameter(torch.zeros(size=(1, 4*out_features)))
+        self.a_low = nn.Parameter(torch.zeros(size=(1, 1*out_features)))
         nn.init.xavier_normal_(self.a_low.data, gain=1.414)
         
         #self.c_high = nn.Parameter(torch.zeros(size=(1, 1)))
@@ -123,8 +123,8 @@ class GraphAttentionLayer(nn.Module):
         #beta_low = self.gam(self.b_low)
         theta_low = self.gam(self.c_low)/2
         theta_high = self.gam(self.c_high)/2
-        c_high = self.gam(self.c_high)
-        c_low = self.gam(self.c_low) -1
+        c_high = self.gam(self.c_high) - 1
+        c_low = self.gam(self.c_low)
 
         h_high = torch.mm(input, self.W_high)
         h_low = torch.mm(input, self.W_low)
@@ -142,10 +142,12 @@ class GraphAttentionLayer(nn.Module):
         #input1 = torch.add((h_high[edge[0, :], :]), h_high[edge[1, :], :])
         #high_sub = torch.sub((h_high[edge[1, :], :]), h_high[edge[0, :], :])
         #input2 = torch.sub(h_low[edge[0, :], :], h_low[edge[1, :], :])
-        high_agg = torch.add((h_high[edge[0, :], :]), h_high[edge[1, :], :])
-        high_diff = torch.sub((h_high[edge[0, :], :]), h_high[edge[1, :], :])
-        low_agg = torch.add((h_low[edge[0, :], :]), h_low[edge[1, :], :])
-        low_diff = torch.sub((h_low[edge[0, :], :]), h_low[edge[1, :], :])
+        #high_agg = torch.add((h_high[edge[0, :], :]), h_high[edge[1, :], :])
+        #high_diff = torch.sub((h_high[edge[0, :], :]), h_high[edge[1, :], :])
+        #low_agg = torch.add((h_low[edge[0, :], :]), h_low[edge[1, :], :])
+        #low_diff = torch.sub((h_low[edge[0, :], :]), h_low[edge[1, :], :])
+        edge_h_high = torch.sub((h_high[edge[0, :], :]), h_high[edge[1, :], :]).t()
+        edge_h_low = torch.add((h_low[edge[0, :], :]), h_low[edge[1, :], :]).t()
         #h_add = self.relu_bt(h_add)
         #h_sub = self.relu_bt(h_sub)
         #low_agg = torch.add(h_low[edge[0, :], :], h_low[edge[1, :], :])
@@ -164,8 +166,8 @@ class GraphAttentionLayer(nn.Module):
         #edge_h_high = torch.add((h_high[edge[0, :], :], h_high[edge[1, :], :]), dim=1).t()
         #edge_h_low = torch.sub((h_low[edge[0, :], :], h_low[edge[1, :], :]), dim=1).t()
         #edge_h = torch.cat((h[edge[0, :], :], h[edge[1, :], :]), dim=1).t()
-        edge_h_high = torch.cat((h_high[edge[0, :], :], h_high[edge[1, :], :], high_agg, high_diff), dim=1).t()
-        edge_h_low = torch.cat((h_high[edge[0, :], :], h_high[edge[1, :], :], low_agg, low_diff), dim=1).t()
+        #edge_h_high = torch.cat((h_high[edge[0, :], :], h_high[edge[1, :], :], high_agg, high_diff), dim=1).t()
+        #edge_h_low = torch.cat((h_high[edge[0, :], :], h_high[edge[1, :], :], low_agg, low_diff), dim=1).t()
         #edge_h_high = torch.cat((h_high[edge[0, :], :], h_high[edge[1, :], :]), dim=1).t()
         #edge_h_low = torch.cat((h_low[edge[0, :], :], h_low[edge[1, :], :]), dim=1).t()
         
