@@ -79,11 +79,8 @@ class GraphAttentionLayer(nn.Module):
     
     def forward(self, input):
         dv = 'cuda' if input.is_cuda else 'cpu'
-
-        if self.dataset == 'citeseer':
-            N = self.adj.size()[0]
-        else:
-            N = input.size()[0]
+        
+        N = input.size()[0]
         edge = self.edge
 
       
