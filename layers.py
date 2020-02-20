@@ -92,39 +92,10 @@ class GraphAttentionLayer(nn.Module):
         h_high = self.relu_bt(h_high)
         h_low = self.relu_bt(h_low)
         #assert not torch.isnan(h_high).any()
-
-        #input1 = torch.add((h_high[edge[0, :], :]), h_high[edge[1, :], :])
-        #high_sub = torch.sub((h_high[edge[1, :], :]), h_high[edge[0, :], :])
-        #input2 = torch.sub(h_low[edge[0, :], :], h_low[edge[1, :], :])
-        #high_agg = torch.add((h_high[edge[0, :], :]), h_high[edge[1, :], :])
-        #high_diff = torch.sub((h_high[edge[0, :], :]), h_high[edge[1, :], :])
-        #low_agg = torch.add((h_low[edge[0, :], :]), h_low[edge[1, :], :])
-        #low_diff = torch.sub((h_low[edge[0, :], :]), h_low[edge[1, :], :])
+        
         edge_h_high = torch.sub((h_high[edge[0, :], :]), h_high[edge[1, :], :]).t()
         edge_h_low = torch.add((h_low[edge[0, :], :]), h_low[edge[1, :], :]).t()
-        #h_add = self.relu_bt(h_add)
-        #h_sub = self.relu_bt(h_sub)
-        #low_agg = torch.add(h_low[edge[0, :], :], h_low[edge[1, :], :])
         
-        #input1 = self.relu_bt(input1)
-        #input2 = self.relu_bt(input2)
-        #high_sub = self.relu_bt(high_sub)
-        #low_agg = self.relu_bt(low_agg)
-        #if not self.concat:
-            # if this layer is last layer,
-        #    input2 = torch.add((h_high[edge[0, :], :]), h_high[edge[1, :], :])
-        
-        # Self-attention on the nodes - Shared attention mechanism
-        #edge_h_high = torch.cat((beta_high*h_high[edge[0, :], :], (2-beta_high)*h_high[edge[1, :], :], input1), dim=1).t()
-        #edge_h_low = torch.cat((beta_low*h_low[edge[0, :], :], (2-beta_low)*h_low[edge[1, :], :], input2), dim=1).t()
-        #edge_h_high = torch.add((h_high[edge[0, :], :], h_high[edge[1, :], :]), dim=1).t()
-        #edge_h_low = torch.sub((h_low[edge[0, :], :], h_low[edge[1, :], :]), dim=1).t()
-        #edge_h = torch.cat((h[edge[0, :], :], h[edge[1, :], :]), dim=1).t()
-        #edge_h_high = torch.cat((h_high[edge[0, :], :], h_high[edge[1, :], :], high_agg, high_diff), dim=1).t()
-        #edge_h_low = torch.cat((h_high[edge[0, :], :], h_high[edge[1, :], :], low_agg, low_diff), dim=1).t()
-        #edge_h_high = torch.cat((h_high[edge[0, :], :], h_high[edge[1, :], :]), dim=1).t()
-        #edge_h_low = torch.cat((h_low[edge[0, :], :], h_low[edge[1, :], :]), dim=1).t()
-
         edge_e_high = torch.exp(-self.leakyrelu(self.a_high.mm(edge_h_high).squeeze()))
         edge_e_low = torch.exp(-self.leakyrelu(self.a_low.mm(edge_h_low).squeeze()))
         assert not torch.isnan(edge_e_high).any()
