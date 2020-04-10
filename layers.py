@@ -77,6 +77,11 @@ class GraphAttentionLayer(nn.Module):
         threshold = torch.norm(x,p=float("inf")).clone().detach()
         return - torch.threshold(-F.leaky_relu(x),-threshold,-threshold)
     
+    def relu_bt(self, x):
+        #threshold = torch.norm(x,p=float("inf")).clone().detach()
+        #return - torch.threshold(-F.leaky_relu(x),-threshold,-threshold)
+        return F.elu(x)
+    
     def forward(self, input):
         dv = 'cuda' if input.is_cuda else 'cpu'
         
@@ -89,14 +94,14 @@ class GraphAttentionLayer(nn.Module):
 
         h_high = torch.mm(input, self.W_high)
         h_low = torch.mm(input, self.W_low)
-        h_high = self.relu_bt(h_high)
-        h_low = self.relu_bt(h_low)
+        #h_high = self.relu_bt(h_high)
+        #h_low = self.relu_bt(h_low)
         #assert not torch.isnan(h_high).any()
         
         edge_h_high = torch.sub((h_high[edge[0, :], :]), h_high[edge[1, :], :]).t()
         edge_h_low = torch.add((h_low[edge[0, :], :]), h_low[edge[1, :], :]).t()
         
-        edge_e_high = torch.exp(-self.leakyrelu(self.a_high.mm(edge_h_high).squeeze()))
+        edge_e_high = torch.exp(-self.leakyrelu(self.a_low.mm(edge_h_high).squeeze()))
         edge_e_low = torch.exp(-self.leakyrelu(self.a_low.mm(edge_h_low).squeeze()))
         assert not torch.isnan(edge_e_high).any()
         # edge_e: E
