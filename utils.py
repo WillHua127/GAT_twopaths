@@ -26,8 +26,16 @@ def load_dataset(dataset, dense=False):
     elif dataset == 'pubmed':
         y=60
     idx_train = range(y)
-    idx_val = range(y, len(s_val) + 500)
-    idx_test = range(len(s_val) + 500, len(s_val) + 1500)
+    idx_val = range(y, y + 500)
+    idx_test = range(y + 500, y + 1500)
+
+    if dataset == 'cora':
+        idx_train, idx_val, idx_test = range(140), range(140, 640), range(1708, 2708)
+    elif dataset == 'citeseer':
+        idx_train, idx_val, idx_test = range(120), range(120, 620), range(2312, 3312)
+    elif dataset == 'pubmed':
+        idx_train, idx_val, idx_test = range(60), range(60, 560), range(18717, 19717)
+        
     idx_train = torch.LongTensor(idx_train)
     idx_val = torch.LongTensor(idx_val)
     idx_test = torch.LongTensor(idx_test)
